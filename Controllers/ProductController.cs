@@ -46,6 +46,10 @@ public class ProductController : ControllerBase {
                     p.product_name,
                     p.unit_price,
                     p.unit_in_stock,
+                    p.product_picture,
+                    p.created_date,
+                    p.modified_date,
+                    p.category_id,
                     c.category_name
                 }
             ).ToList();
@@ -63,14 +67,15 @@ public class ProductController : ControllerBase {
     }
 
     [HttpPost]
-    public async Task<ActionResult<product>> CreateProduct([FromForm] product product, IFormFile image) {
+    public async Task<ActionResult<product>> CreateProduct([FromForm] product product, IFormFile? image) {
         _context.products.Add(product);
 
         // Check if image is uploaded
         if (image != null) {
             string fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
 
-            string uploadFolder = Path.Combine(_env.ContentRootPath, "uploads");
+            string uploadFolder = Path.Combine(_env.WebRootPath, "uploads");
+
             if (!Directory.Exists(uploadFolder)) {
                 Directory.CreateDirectory(uploadFolder);
             }
