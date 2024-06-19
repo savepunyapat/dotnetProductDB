@@ -69,7 +69,7 @@ public class AuthenticateController : ControllerBase
             await _roleManager.CreateAsync(new IdentityRole(UserRoles.Manager));
         }
 
-        if (!await _roleManager.RoleExistsAsync(UserRoles.User))
+        if (await _roleManager.RoleExistsAsync(UserRoles.User))
         {
             await _roleManager.CreateAsync(new IdentityRole(UserRoles.User));
             await _userManager.AddToRoleAsync(user, UserRoles.User);
@@ -115,16 +115,17 @@ public class AuthenticateController : ControllerBase
             await _roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
         }
 
-        if (!await _roleManager.RoleExistsAsync(UserRoles.Manager))
+        if (!await _roleManager.RoleExistsAsync(UserRoles.User))
+        {
+            await _roleManager.CreateAsync(new IdentityRole(UserRoles.User));
+        }
+
+        if (await _roleManager.RoleExistsAsync(UserRoles.Manager))
         {
             await _roleManager.CreateAsync(new IdentityRole(UserRoles.Manager));
             await _userManager.AddToRoleAsync(user, UserRoles.Manager);
         }
 
-        if (!await _roleManager.RoleExistsAsync(UserRoles.User))
-        {
-            await _roleManager.CreateAsync(new IdentityRole(UserRoles.User));
-        }
 
         return Ok(new Response { Status = "Success", Message = "User created successfully!" });
     }
@@ -161,10 +162,9 @@ public class AuthenticateController : ControllerBase
                 }
             );
 
-        if (!await _roleManager.RoleExistsAsync(UserRoles.Admin))
+        if (!await _roleManager.RoleExistsAsync(UserRoles.User))
         {
-            await _roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
-            await _userManager.AddToRoleAsync(user, UserRoles.Admin);
+            await _roleManager.CreateAsync(new IdentityRole(UserRoles.User));
         }
 
         if (!await _roleManager.RoleExistsAsync(UserRoles.Manager))
@@ -172,9 +172,10 @@ public class AuthenticateController : ControllerBase
             await _roleManager.CreateAsync(new IdentityRole(UserRoles.Manager));
         }
 
-        if (!await _roleManager.RoleExistsAsync(UserRoles.User))
+        if (await _roleManager.RoleExistsAsync(UserRoles.Admin))
         {
-            await _roleManager.CreateAsync(new IdentityRole(UserRoles.User));
+            await _roleManager.CreateAsync(new IdentityRole(UserRoles.Admin));
+            await _userManager.AddToRoleAsync(user, UserRoles.Admin);
         }
 
         return Ok(new Response { Status = "Success", Message = "User created successfully!" });
@@ -208,7 +209,13 @@ public class AuthenticateController : ControllerBase
             return Ok(new
             {
                 token = new JwtSecurityTokenHandler().WriteToken(token),
-                expiration = token.ValidTo
+                expiration = token.ValidTo,
+                userData = new
+                {
+                    userName = user.UserName,
+                    email = user.Email,
+                    roles = userRoles
+                }
             });
         }
 

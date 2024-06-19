@@ -92,7 +92,7 @@ builder.Services.AddSwaggerGen(opt =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment() || app.Environment.IsProduction())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
@@ -117,8 +117,12 @@ app.UseCors(options =>
 // Use Static Files
 app.UseStaticFiles();
 
-app.UseHttpsRedirection();
+if(!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
+app.UseCors();
 // Add Authentication
 app.UseAuthentication();
 app.UseAuthorization();
