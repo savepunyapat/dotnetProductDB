@@ -73,7 +73,7 @@ public class ProductController : ControllerBase {
             .Skip(skip)
             .Take(limit)
             .ToList();
-            return Ok(new {TotalCount = totalRecords, Products = products});
+            return Ok(new {Total = totalRecords, Products = products});
     }
 
     [HttpGet("{id}")]
@@ -85,31 +85,44 @@ public class ProductController : ControllerBase {
         return Ok(product);
     }
 
-    [HttpPost]
-    public async Task<ActionResult<product>> CreateProduct([FromForm] product product, IFormFile? image) {
+   [HttpPost]
+    public async Task<ActionResult<product>> CreateProduct([FromForm] product product, IFormFile? image)
+    {
+        // เพิ่มข้อมูลลงในตาราง Products
         _context.products.Add(product);
 
-        if (image != null) {
+        // ตรวจสอบว่ามีการอัพโหลดไฟล์รูปภาพหรือไม่
+        if(image != null){
+            // กำหนดชื่อไฟล์รูปภาพใหม่
             string fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
 
+            // บันทึกไฟล์รูปภาพ
+            // string uploadFolder = Path.Combine(_env.ContentRootPath, "uploads");
             string uploadFolder = Path.Combine(_env.WebRootPath, "uploads");
 
-            if (!Directory.Exists(uploadFolder)) {
+            // ตรวจสอบว่าโฟลเดอร์ uploads มีหรือไม่
+            if (!Directory.Exists(uploadFolder))
+            {
                 Directory.CreateDirectory(uploadFolder);
             }
-            using (var fileStream = new FileStream(Path.Combine(uploadFolder, fileName), FileMode.Create)) {
+
+            using (var fileStream = new FileStream(Path.Combine(uploadFolder, fileName), FileMode.Create))
+            {
                 await image.CopyToAsync(fileStream);
             }
+
+            // บันทึกชื่อไฟล์รูปภาพลงในฐานข้อมูล
             product.product_picture = fileName;
         } else {
             product.product_picture = "noimg.jpg";
         }
 
-
-        
         _context.SaveChanges();
+
+        // ส่งข้อมูลกลับไปให้ผู้ใช้
         return Ok(product);
     }
+
 
     [HttpPut("{id}")]
     public async Task<ActionResult<product>> UpdateProduct(int id, product product, IFormFile? image) {
