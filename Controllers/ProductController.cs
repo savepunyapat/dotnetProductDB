@@ -88,19 +88,14 @@ public class ProductController : ControllerBase {
    [HttpPost]
     public async Task<ActionResult<product>> CreateProduct([FromForm] product product, IFormFile? image)
     {
-        // เพิ่มข้อมูลลงในตาราง Products
         _context.products.Add(product);
 
-        // ตรวจสอบว่ามีการอัพโหลดไฟล์รูปภาพหรือไม่
         if(image != null){
-            // กำหนดชื่อไฟล์รูปภาพใหม่
             string fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
 
-            // บันทึกไฟล์รูปภาพ
-            // string uploadFolder = Path.Combine(_env.ContentRootPath, "uploads");
+           
             string uploadFolder = Path.Combine(_env.WebRootPath, "uploads");
 
-            // ตรวจสอบว่าโฟลเดอร์ uploads มีหรือไม่
             if (!Directory.Exists(uploadFolder))
             {
                 Directory.CreateDirectory(uploadFolder);
@@ -111,7 +106,6 @@ public class ProductController : ControllerBase {
                 await image.CopyToAsync(fileStream);
             }
 
-            // บันทึกชื่อไฟล์รูปภาพลงในฐานข้อมูล
             product.product_picture = fileName;
         } else {
             product.product_picture = "noimg.jpg";
@@ -119,30 +113,34 @@ public class ProductController : ControllerBase {
 
         _context.SaveChanges();
 
-        // ส่งข้อมูลกลับไปให้ผู้ใช้
         return Ok(product);
     }
 
 
     [HttpPut("{id}")]
-    public async Task<ActionResult<product>> UpdateProduct(int id, product product, IFormFile? image) {
-        
+    public async Task<ActionResult<product>> UpdateProduct(
+        int id, [FromForm] 
+        product product, 
+        IFormFile? image
+    )
+    {
         var existingProduct = _context.products.FirstOrDefault(p => p.product_id == id);
 
-
-        if(existingProduct == null) {
+        if (existingProduct == null)
+        {
             return NotFound();
         }
-        
+
         existingProduct.product_name = product.product_name;
         existingProduct.unit_price = product.unit_price;
         existingProduct.unit_in_stock = product.unit_in_stock;
         existingProduct.category_id = product.category_id;
         existingProduct.modified_date = product.modified_date;
-        
+
         if(image != null){
             string fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
 
+         
             string uploadFolder = Path.Combine(_env.WebRootPath, "uploads");
 
             if (!Directory.Exists(uploadFolder))
@@ -161,6 +159,7 @@ public class ProductController : ControllerBase {
 
             existingProduct.product_picture = fileName;
         }
+
         _context.SaveChanges();
 
         return Ok(existingProduct);

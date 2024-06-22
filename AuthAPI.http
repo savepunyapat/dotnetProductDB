@@ -1,5 +1,5 @@
 // Authentication API
-@AuthAPI_HostAddress = http://localhost:5158/api/Authenticate
+@AuthAPI_HostAddress = http://localhost:8081/api/Authenticate
 
 
 // Register User API
@@ -31,6 +31,6 @@ POST {{AuthAPI_HostAddress}}/login
 Content-Type: application/json
 
 {
-  "username": "punyapatadmin2",
-  "password": "AdminSave2@1234"
+  "username": "iamsamit",
+  "password": "Samit@1234"
 }
